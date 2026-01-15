@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>지구 개발 주식회사</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #222;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { margin-bottom: 10px; color: #ffd700; text-shadow: 2px 2px #000; }
+
+        /* 게임 보드 스타일 (부루마블 형태) */
+        #board {
+            display: grid;
+            grid-template-columns: repeat(6, 80px);
+            grid-gap: 5px;
+            margin: 20px;
+            background: #333;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .tile {
+            width: 80px;
+            height: 80px;
+            background-color: #444;
+            border: 1px solid #555;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .tile.occupied { border: 3px solid; }
+
+        /* 플레이어 말 */
+        .player-token {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 5px;
+            box-shadow: 0 0 5px white;
+        }
+
+        /* 컨트롤 패널 */
+        #controls {
+            background: #111;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        button {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        button:hover { background: #b71c1c; }
+        button:disabled { background: #555; cursor: not-allowed; }
+
+        /* 모달 (선택 창) */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal-box {
+            background: #222;
+            border: 2px solid #d32f2f;
+            padding: 30px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 20px #d32f2f;
+        }
+
+        .warning-text {
+            color: #d32f2f;
+            font-size: 20px;
+            font-weight: bold;
+            animation: blink 1s infinite;
+            margin: 20px 0;
+        }
+
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        .btn-develop {
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            color: #000;
+            font-size: 18px;
+            padding: 15px 30px;
+            border: 2px solid white;
+            box-shadow: 0 0 10px yellow;
+        }
+
+        .btn-preserve {
+            background: #388e3c;
+            font-size: 12px;
+            padding: 5px 10px;
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+
+        /* 엔딩 화면 */
+        #ending-screen {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            color: #d32f2f;
+            z-index: 200;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        #ending-title { font-size: 40px; margin-bottom: 20px; }
+        #ending-message { font-size: 18px; line-height: 1.6; color: #fff; max-width: 600px; }
+    </style>
+</head>
+<body>
+
+    <h1>🌍 지구 개발 경쟁</h1>
+    
+    <div id="controls">
+        <h2 id="turn-info">플레이어 1의 차례 (남은 턴: 5)</h2>
+        <div id="dice-result" style="margin: 10px; font-size: 24px;">🎲 준비</div>
+        <button id="roll-btn" onclick="rollDice()">주사위 굴리기</button>
+        <div id="score-board" style="margin-top: 15px; display: flex; justify-content: space-around;">
+            </div>
+    </div>
+
+    <div id="board">
+        </div>
+
+    <div id="modal-overlay">
+        <div id="modal-box">
+            <h2 id="modal-title">지역 이름</h2>
+            <p id="modal-desc" style="color:#aaa;">환경 설명</p>
+            <div class="warning-text">⚠️ 경고: 생태계 파괴 위험 ⚠️<br>개발하시겠습니까?</div>
+            <p style="font-size:12px; color: #555;">(개발 시 승점 +1 획득)</p>
+            
+            <button class="btn-develop" onclick="makeChoice(true)">네, 개발하여 이익을 얻습니다.</button>
+            <br>
+            <button class="btn-preserve" onclick="makeChoice(false)">아니요, 보존합니다. (점수 없음)</button>
+        </div>
+    </div>
+
+    <div id="ending-screen">
+        <h1 id="ending-title">GAME OVER</h1>
+        <div id="ending-message"></div>
+        <button onclick="location.reload()" style="margin-top:50px;">처음으로 (지구 리셋)</button>
+    </div>
+
+    <script>
+        // --- 게임 설정 및 데이터 ---
+        const players = [
+            { id: 1, name: "P1", color: "#ff5252", pos: 0, score: 0, lands: [] },
+            { id: 2, name: "P2", color: "#448aff", pos: 0, score: 0, lands: [] },
+            { id: 3, name: "P3", color: "#69f0ae", pos: 0, score: 0, lands: [] },
+            { id: 4, name: "P4", color: "#e040fb", pos: 0, score: 0, lands: [] }
+        ];
+        
+        const maxTurns = 5; // 각 플레이어 당 턴 수
+        let currentTurn = 1; // 현재 라운드
+        let currentPlayerIdx = 0; // 현재 플레이어 인덱스 (0~3)
+        let totalTurnsPlayed = 0;
+        
+        // 맵 데이터 (20칸: 0은 시작점)
+        const mapData = [
+            { name: "출발", desc: "안전지대", type: "start" },
+            { name: "아마존", desc: "지구의 허파. 수천 종의 희귀 생물이 서식 중입니다.", type: "land" },
+            { name: "남극", desc: "거대한 빙하. 해수면 상승을 막고 있습니다.", type: "land" },
+            { name: "산호초", desc: "해양 생태계의 보고. 파괴 시 복구 불가능.", type: "land" },
+            { name: "세렝게티", desc: "야생동물의 마지막 낙원.", type: "land" },
+            { name: "알래스카", desc: "영구동토층. 메탄 가스가 봉인되어 있습니다.", type: "land" },
+            { name: "갈라파고스", desc: "진화론의 살아있는 증거.", type: "land" },
+            { name: "히말라야", desc: "세계의 지붕. 식수원의 근원지.", type: "land" },
+            { name: "툰드라", desc: "지구 온난화의 최전선.", type: "land" },
+            { name: "보르네오", desc: "오랑우탄의 마지막 서식지.", type: "land" },
+            { name: "그린란드", desc: "북반구 기후 조절의 핵심.", type: "land" },
+            { name: "바이칼호", desc: "세계에서 가장 깊고 깨끗한 호수.", type: "land" },
+            { name: "콩고 분지", desc: "아프리카의 심장.", type: "land" },
+            { name: "마다가스카르", desc: "고유종의 보물창고.", type: "land" },
+            { name: "북극해", desc: "북극곰의 터전.", type: "land" },
+            { name: "그레이트배리어리프", desc: "세계 최대의 산호초 지대.", type: "land" },
+            { name: "옐로스톤", desc: "최초의 국립공원.", type: "land" },
+            { name: "사하라", desc: "확장되는 사막화의 경계.", type: "land" },
+            { name: "몰디브", desc: "가라앉고 있는 섬나라.", type: "land" },
+            { name: "우주 정거장", desc: "최후의 도피처?", type: "land" }
+        ];
+
+        const boardState = new Array(mapData.length).fill(null); // 소유자 정보 저장
+
+        // --- 초기화 ---
+        function initGame() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            
+            // 보드 UI 생성
+            mapData.forEach((tile, index) => {
+                const div = document.createElement('div');
+                div.className = 'tile';
+                div.id = `tile-${index}`;
+                div.innerHTML = `<div>${tile.name}</div>`;
+                boardEl.appendChild(div);
+            });
+            updatePlayerTokens();
+            updateScoreBoard();
+        }
+
+        // --- 플레이어 토큰 업데이트 ---
+        function updatePlayerTokens() {
+            // 기존 토큰 제거
+            document.querySelectorAll('.player-token').forEach(el => el.remove());
+
+            players.forEach(p => {
+                const tile = document.getElementById(`tile-${p.pos}`);
+                const token = document.createElement('div');
+                token.className = 'player-token';
+                token.style.backgroundColor = p.color;
+                // 겹침 방지를 위해 약간씩 위치 조정
+                token.style.left = `${10 + (p.id * 10)}px`; 
+                tile.appendChild(token);
+            });
+        }
+
+        // --- 점수판 업데이트 ---
+        function updateScoreBoard() {
+            const sb = document.getElementById('score-board');
+            sb.innerHTML = players.map(p => 
+                `<div style="color:${p.color}">${p.name}: ${p.score}땅</div>`
+            ).join('');
+        }
+
+        // --- 게임 로직: 주사위 굴리기 ---
+        function rollDice() {
+            const btn = document.getElementById('roll-btn');
+            btn.disabled = true;
+
+            const dice = Math.floor(Math.random() * 6) + 1;
+            document.getElementById('dice-result').innerText = `🎲 ${dice}`;
+
+            // 이동
+            const player = players[currentPlayerIdx];
+            player.pos = (player.pos + dice) % mapData.length;
+            updatePlayerTokens();
+
+            // 도착한 곳 확인
+            const landIndex = player.pos;
+            const landInfo = mapData[landIndex];
+
+            setTimeout(() => {
+                if (landInfo.type === 'start') {
+                    nextTurn();
+                } else if (boardState[landIndex] !== null) {
+                    alert(`이미 ${players[boardState[landIndex]-1].name}에 의해 개발된 지역입니다.`);
+                    nextTurn();
+                } else {
+                    // 미개발 지역: 선택 모달 띄우기
+                    showChoiceModal(landInfo, landIndex);
+                }
+            }, 500);
+        }
+
+        // --- 선택 모달 ---
+        let currentLandIndex = -1;
+
+        function showChoiceModal(info, index) {
+            currentLandIndex = index;
+            document.getElementById('modal-title').innerText = info.name;
+            document.getElementById('modal-desc').innerText = info.desc;
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+
+        function makeChoice(isDevelop) {
+            document.getElementById('modal-overlay').style.display = 'none';
+            const player = players[currentPlayerIdx];
+
+            if (isDevelop) {
+                // 개발 선택: 땅 차지, 점수 획득
+                boardState[currentLandIndex] = player.id;
+                player.score++;
+                player.lands.push(mapData[currentLandIndex].name);
+                
+                // 타일 시각적 변경 (개발됨)
+                const tile = document.getElementById(`tile-${currentLandIndex}`);
+                tile.style.backgroundColor = player.color;
+                tile.style.color = "#000";
+                tile.innerHTML += "<br>🚧개발됨";
+                tile.classList.add('occupied');
+            } else {
+                // 보존 선택: 아무 일도 없음
+                // alert("자연을 지켰지만 경쟁에서 뒤처질 수 있습니다.");
+            }
+            
+            updateScoreBoard();
+            nextTurn();
+        }
+
+        // --- 턴 넘기기 ---
+        function nextTurn() {
+            currentPlayerIdx++;
+            if (currentPlayerIdx >= 4) {
+                currentPlayerIdx = 0;
+                currentTurn++;
+            }
+            totalTurnsPlayed++;
+
+            // 게임 종료 조건 확인
+            if (totalTurnsPlayed >= 4 * maxTurns) {
+                endGame();
+                return;
+            }
+
+            // UI 업데이트
+            document.getElementById('turn-info').innerText = 
+                `플레이어 ${players[currentPlayerIdx].id}의 차례 (라운드: ${currentTurn}/${maxTurns})`;
+            document.getElementById('roll-btn').disabled = false;
+            document.getElementById('dice-result').innerText = `🎲 대기 중...`;
+        }
+
+        // --- 엔딩 ---
+        function endGame() {
+            const endingScreen = document.getElementById('ending-screen');
+            const winner = players.reduce((prev, current) => (prev.score > current.score) ? prev : current);
+            
+            // 모든 플레이어가 개발한 땅의 목록
+            const allDestroyedLands = players.flatMap(p => p.lands);
+            const destructionCount = allDestroyedLands.length;
+
+            endingScreen.style.display = 'flex';
+            
+            let message = `
+                <strong style="font-size:30px; color:${winner.color}">우승자: ${winner.name}</strong><br>
+                (차지한 땅: ${winner.score}곳)<br><br>
+                <hr style="border-color:#555; width:50%;">
+                <br>
+                당신들이 경쟁하는 동안...<br><br>
+            `;
+
+            if (destructionCount === 0) {
+                message += "놀랍게도 아무도 개발을 하지 않았습니다. 지구는 안전합니다.<br>하지만 게임은 재미없었죠? 그게 바로 지속가능한 삶입니다.";
+            } else {
+                message += `
+                    <span style="color:red; font-size:24px;">다음 지역들이 영구적으로 파괴되었습니다:</span><br><br>
+                    ${allDestroyedLands.join(', ')}...<br><br>
+                    아마존은 불탔고, 빙하는 녹았으며, 동물들은 갈 곳을 잃었습니다.<br>
+                    당신은 게임에서 이겼지만, <span style="color:red; font-weight:bold;">우리가 살 곳은 이제 없습니다.</span>
+                `;
+            }
+
+            document.getElementById('ending-message').innerHTML = message;
+        }
+
+        // 시작
+        initGame();
+
+    </script>
+</body>
+</html>
