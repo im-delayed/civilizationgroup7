@@ -14,12 +14,15 @@
             --text-gray: #a0aec0;
             --blue: #4c6ef5;
             --red: #fa5252;
+            --dark-red: #c92a2a;
             --green: #40c057;
             --yellow: #fcc419;
+            --modal-bg: #1e2337; /* 모달 배경색 */
+            --warning-bg: rgba(250, 82, 82, 0.15); /* 경고 박스 배경색 */
         }
 
         body {
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; /* 기본 폰트 사용 */
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif; /* 폰트 변경 */
             background-color: var(--bg-main);
             color: var(--text-white);
             margin: 0;
@@ -28,10 +31,10 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden; /* 가로 스크롤 방지 */
+            overflow-x: hidden;
         }
 
-        /* 로딩 메시지 (JS 오류 시 보임) */
+        /* 로딩 메시지 */
         #loading-msg {
             color: white;
             font-size: 20px;
@@ -45,56 +48,57 @@
             width: 100%;
         }
 
-        h1 { margin: 0; font-size: 24px; color: var(--text-white); }
+        h1 { margin: 0; font-size: 28px; color: var(--text-white); }
         .round-badge {
             background: var(--bg-tertiary);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 16px;
             color: var(--text-gray);
-            margin-top: 10px;
+            margin-top: 15px;
             display: inline-block;
         }
 
         /* 메인 레이아웃 */
         .game-container {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             width: 100%;
             max-width: 1200px;
             justify-content: center;
             align-items: flex-start;
-            flex-wrap: wrap; /* 모바일 대응 */
+            flex-wrap: wrap;
         }
 
         /* 보드 (왼쪽) */
         #board-grid {
             flex: 2;
-            min-width: 300px;
+            min-width: 320px;
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5열 */
-            gap: 10px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
         }
 
         /* 타일 스타일 */
         .tile {
             background-color: var(--bg-secondary);
-            border-radius: 10px;
+            border-radius: 16px;
             aspect-ratio: 1/1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
-            border: 2px solid transparent;
-            transition: 0.2s;
+            border: 3px solid transparent;
+            transition: 0.3s ease;
             cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .tile:hover { transform: translateY(-2px); background-color: var(--bg-tertiary); }
+        .tile:hover { transform: translateY(-5px); background-color: var(--bg-tertiary); box-shadow: 0 8px 12px rgba(0,0,0,0.2); }
         
-        .flag { font-size: 24px; margin-bottom: 5px; }
-        .name { font-size: 12px; font-weight: bold; text-align: center; }
+        .flag { font-size: 40px; margin-bottom: 10px; }
+        .name { font-size: 14px; font-weight: bold; text-align: center; }
         
         /* 점령된 타일 효과 */
         .tile.p1-land { border-color: var(--red); background: rgba(250, 82, 82, 0.1); }
@@ -105,31 +109,32 @@
         /* 플레이어 말 (토큰) */
         .token-zone {
             position: absolute;
-            bottom: 5px;
+            bottom: 8px;
             display: flex;
-            gap: 2px;
+            gap: 4px;
         }
         .token {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            border: 1px solid white;
+            border: 2px solid var(--bg-secondary);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
 
         /* 사이드바 (오른쪽) */
         #sidebar {
             flex: 1;
-            min-width: 280px;
+            min-width: 300px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 25px;
         }
 
         .panel {
             background: var(--bg-secondary);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
         /* 순위표 */
@@ -137,65 +142,103 @@
             display: flex;
             align-items: center;
             background: var(--bg-tertiary);
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 10px;
-            border-left: 5px solid transparent;
+            margin-bottom: 12px;
+            padding: 15px;
+            border-radius: 15px;
+            border-left: 6px solid transparent;
+            transition: 0.3s;
         }
-        .rank-item.active { border-left-color: white; background: #3b4259; }
+        .rank-item.active { border-left-color: var(--text-white); background: #3b4259; transform: scale(1.02); }
         
-        .rank-num { font-weight: bold; width: 20px; margin-right: 10px; }
+        .rank-num { font-weight: bold; font-size: 18px; width: 30px; margin-right: 15px; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); border-radius: 50%; height: 30px; }
         .rank-info { flex: 1; }
-        .rank-bar-bg { width: 100%; height: 6px; background: #555; border-radius: 3px; margin-top: 5px; }
-        .rank-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+        .rank-bar-bg { width: 100%; height: 8px; background: #555; border-radius: 4px; margin-top: 8px; overflow: hidden; }
+        .rank-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease-in-out; }
 
         /* 컨트롤 패널 */
         .control-box { text-align: center; }
-        #dice-val { font-size: 40px; margin: 15px 0; height: 50px; }
+        #dice-val { font-size: 60px; margin: 20px 0; height: 70px; display: flex; justify-content: center; align-items: center; }
         
         #roll-btn {
             width: 100%;
-            padding: 15px;
-            font-size: 18px;
+            padding: 18px;
+            font-size: 20px;
             font-weight: bold;
             color: white;
             background: var(--blue);
             border: none;
-            border-radius: 10px;
+            border-radius: 15px;
             cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 0 #364fc7;
         }
-        #roll-btn:disabled { background: #555; cursor: not-allowed; }
+        #roll-btn:hover { background: #3b5bdb; box-shadow: 0 2px 0 #364fc7; transform: translateY(2px); }
+        #roll-btn:disabled { background: #555; box-shadow: none; cursor: not-allowed; transform: none; }
 
-        /* 모달창 (팝업) */
+        /* --- 모달창 (팝업) 디자인 수정 --- */
         #modal {
-            display: none; /* 기본 숨김 */
+            display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85); /* 더 어두운 배경 */
             z-index: 999;
             justify-content: center;
             align-items: center;
+            backdrop-filter: blur(5px); /* 블러 효과 */
         }
         .modal-content {
-            background: var(--bg-secondary);
-            padding: 30px;
-            border-radius: 15px;
+            background: var(--modal-bg);
+            padding: 40px;
+            border-radius: 25px;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
             text-align: center;
             border: 2px solid var(--red);
-            box-shadow: 0 0 20px rgba(250, 82, 82, 0.4);
+            box-shadow: 0 0 30px rgba(250, 82, 82, 0.3);
+            position: relative;
+            overflow: hidden;
         }
-        .warning-blink {
-            color: var(--red);
-            font-weight: bold;
-            animation: blink 1s infinite;
-            margin-bottom: 10px;
-        }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        
+        .modal-flag { font-size: 60px; margin-bottom: 10px; }
+        #modal-title { font-size: 28px; font-weight: bold; margin-bottom: 5px; }
+        .arrival-msg { color: var(--blue); font-size: 16px; margin-bottom: 30px; }
 
-        .btn-yes { background: linear-gradient(45deg, #ffc107, #ff9800); color: black; width: 100%; padding: 15px; border:none; border-radius: 8px; font-weight:bold; font-size:16px; margin-bottom: 10px; cursor: pointer; }
-        .btn-no { background: transparent; color: #aaa; border: 1px solid #aaa; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; }
+        .warning-box {
+            background: var(--warning-bg);
+            border: 2px solid var(--red);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .warning-title { color: var(--red); font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        #modal-desc { color: var(--text-white); font-size: 16px; line-height: 1.5; margin: 0; }
+
+        .fatal-warning {
+            color: var(--yellow);
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 25px;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        
+        .btn-yes { 
+            background: linear-gradient(135deg, var(--red), var(--dark-red));
+            color: white; width: 100%; padding: 20px; border:none; border-radius: 15px; 
+            font-weight:bold; font-size: 20px; margin-bottom: 15px; cursor: pointer; 
+            box-shadow: 0 5px 15px rgba(250, 82, 82, 0.4); transition: 0.2s;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .btn-yes:hover { transform: scale(1.02); box-shadow: 0 8px 20px rgba(250, 82, 82, 0.6); }
+        
+        .extra-warning { color: var(--yellow); font-size: 14px; margin-bottom: 5px; }
+        .game-rule { color: var(--text-gray); font-size: 14px; margin-bottom: 25px; }
+
+        .btn-no { 
+            background: transparent; color: var(--text-gray); border: 2px solid var(--text-gray); 
+            width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 16px; transition: 0.2s; 
+        }
+        .btn-no:hover { border-color: var(--text-white); color: var(--text-white); background: rgba(255,255,255,0.1); }
 
         /* 엔딩 화면 */
         #ending {
@@ -208,9 +251,10 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 20px;
+            padding: 40px;
         }
     </style>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
 </head>
 <body>
 
@@ -219,7 +263,7 @@
         <div class="round-badge" id="round-txt">ROUND 1 / 5</div>
     </header>
 
-    <div id="loading-msg">게임을 불러오는 중입니다...<br>(화면이 계속 이 상태라면 새로고침 해주세요)</div>
+    <div id="loading-msg">게임을 불러오는 중입니다...</div>
 
     <div class="game-container" id="game-ui" style="display:none;">
         <div id="board-grid"></div>
@@ -240,64 +284,76 @@
 
     <div id="modal">
         <div class="modal-content">
-            <div class="warning-blink">⚠️ 경고: 생태계 파괴 위험 ⚠️</div>
-            <h2 id="modal-title">지역 이름</h2>
-            <p id="modal-desc" style="color:#ccc; font-size:14px; margin-bottom:20px;">설명</p>
-            <button class="btn-yes" onclick="decide(true)">⛔ 경고 무시하고 개발 (+1점)</button>
+            <div class="modal-flag" id="modal-flag">🇧🇷</div>
+            <h2 id="modal-title">브라질</h2>
+            <p class="arrival-msg" id="modal-arrival-msg">플레이어 1이(가) 도착했습니다</p>
+
+            <div class="warning-box">
+                <div class="warning-title">⚠️ 환경 경고</div>
+                <p id="modal-desc">아마존 열대우림이 파괴됩니다</p>
+            </div>
+
+            <div class="fatal-warning">💀 되돌릴 수 없습니다 💀</div>
+
+            <button class="btn-yes" onclick="decide(true)">
+                ⚡ 이 곳을 개발하시겠습니까?
+            </button>
+            
+            <div class="extra-warning">⚠️ 금지 ⚠️ 개발 금지 ⚠️ 누르지 마세요 ⚠️</div>
+            <p class="game-rule">(승리하려면 개발해야 합니다)</p>
+
             <button class="btn-no" onclick="decide(false)">보존하기 (점수 없음)</button>
         </div>
     </div>
 
     <div id="ending">
-        <h1 style="color:var(--red); font-size:40px;">GAME OVER</h1>
-        <div id="ending-txt" style="color:white; max-width:600px; line-height:1.6; margin-top:20px;"></div>
-        <button onclick="location.reload()" style="margin-top:30px; padding:10px 20px; background:#333; color:white; border:1px solid #555;">처음으로</button>
+        <h1 style="color:var(--red); font-size:50px; margin-bottom: 30px;">GAME OVER</h1>
+        <div id="ending-txt" style="color:white; max-width:700px; line-height:1.8; font-size: 18px;"></div>
+        <button onclick="location.reload()" style="margin-top:40px; padding:15px 30px; background:var(--red); color:white; border:none; border-radius: 10px; font-size: 18px; cursor: pointer;">처음으로 돌아가기</button>
     </div>
 
     <script>
         // --- 데이터 설정 ---
         const players = [
-            { id: 1, name: "P1", color: "#fa5252", pos: 0, score: 0, lands: [], css: "p1-land" },
-            { id: 2, name: "P2", color: "#4c6ef5", pos: 0, score: 0, lands: [], css: "p2-land" },
-            { id: 3, name: "P3", color: "#40c057", pos: 0, score: 0, lands: [], css: "p3-land" },
-            { id: 4, name: "P4", color: "#be4bdb", pos: 0, score: 0, lands: [], css: "p4-land" }
+            { id: 1, name: "플레이어 1", color: "#fa5252", pos: 0, score: 0, lands: [], css: "p1-land" },
+            { id: 2, name: "플레이어 2", color: "#4c6ef5", pos: 0, score: 0, lands: [], css: "p2-land" },
+            { id: 3, name: "플레이어 3", color: "#40c057", pos: 0, score: 0, lands: [], css: "p3-land" },
+            { id: 4, name: "플레이어 4", color: "#be4bdb", pos: 0, score: 0, lands: [], css: "p4-land" }
         ];
 
+        // 맵 데이터 (더 강력한 문구로 수정)
         const mapData = [
-            { name: "브라질", flag: "🇧🇷", desc: "아마존 밀림이 불타고 있습니다." },
-            { name: "호주", flag: "🇦🇺", desc: "산호초가 하얗게 죽어가고 있습니다." },
-            { name: "콩고", flag: "🇨🇩", desc: "열대우림이 훼손되고 있습니다." },
-            { name: "남극", flag: "🇦🇶", desc: "빙하가 녹아 펭귄이 집을 잃었습니다." },
-            { name: "인도", flag: "🇮🇳", desc: "심각한 대기오염으로 고통받고 있습니다." },
-            { name: "중국", flag: "🇨🇳", desc: "사막화가 도심까지 번지고 있습니다." },
-            { name: "미국", flag: "🇺🇸", desc: "허리케인이 매년 강력해지고 있습니다." },
-            { name: "러시아", flag: "🇷🇺", desc: "영구동토층이 녹아 메탄이 나옵니다." },
-            { name: "북극", flag: "🐻‍❄️", desc: "북극곰이 사냥터를 잃었습니다." },
-            { name: "일본", flag: "🇯🇵", desc: "해양 생태계가 위협받고 있습니다." },
-            { name: "몰디브", flag: "🇲🇻", desc: "나라 전체가 물에 잠기고 있습니다." },
-            { name: "캐나다", flag: "🇨🇦", desc: "오일 샌드 채굴로 숲이 사라집니다." },
-            { name: "인니", flag: "🇮🇩", desc: "오랑우탄 숲이 팜유 농장이 되었습니다." },
-            { name: "케냐", flag: "🇰🇪", desc: "가뭄으로 야생동물이 죽고 있습니다." },
-            { name: "영국", flag: "🇬🇧", desc: "이상 기후로 홍수가 잦아졌습니다." },
-            { name: "독일", flag: "🇩🇪", desc: "라인강 수위가 말라가고 있습니다." },
-            { name: "태국", flag: "🇹🇭", desc: "수도가 해수면 상승 위협을 받습니다." },
-            { name: "몽골", flag: "🇲🇳", desc: "초원이 사막으로 변하고 있습니다." },
-            { name: "멕시코", flag: "🇲🇽", desc: "지하수 고갈로 땅이 꺼지고 있습니다." },
-            { name: "한국", flag: "🇰🇷", desc: "사계절이 사라지고 있습니다." }
+            { name: "브라질", flag: "🇧🇷", desc: "지구의 허파, 아마존 열대우림이 영구적으로 파괴됩니다." },
+            { name: "호주", flag: "🇦🇺", desc: "그레이트 배리어 리프의 산호초가 하얗게 죽어 사라집니다." },
+            { name: "콩고", flag: "🇨🇩", desc: "아프리카의 심장, 콩고 분지의 열대우림이 훼손됩니다." },
+            { name: "남극", flag: "🇦🇶", desc: "거대한 빙하가 녹아내려 해수면이 상승하고 펭귄이 멸종합니다." },
+            { name: "인도", flag: "🇮🇳", desc: "숨을 쉴 수 없는 심각한 대기오염이 발생합니다." },
+            { name: "중국", flag: "🇨🇳", desc: "통제 불가능한 사막화가 도심까지 집어삼킵니다." },
+            { name: "미국", flag: "🇺🇸", desc: "더욱 강력해진 슈퍼 허리케인이 도시를 파괴합니다." },
+            { name: "러시아", flag: "🇷🇺", desc: "시베리아 영구동토층이 녹아 시한폭탄 같은 메탄이 방출됩니다." },
+            { name: "북극", flag: "🐻‍❄️", desc: "북극의 얼음이 사라져 북극곰이 익사합니다." },
+            { name: "일본", flag: "🇯🇵", desc: "방사능 오염수로 인해 해양 생태계가 회복 불능 상태가 됩니다." },
+            { name: "몰디브", flag: "🇲🇻", desc: "해수면 상승으로 나라 전체가 지도에서 사라집니다." },
+            { name: "캐나다", flag: "🇨🇦", desc: "오일 샌드 채굴로 광활한 고대 숲이 불모지가 됩니다." },
+            { name: "인도네시아", flag: "🇮🇩", desc: "팜유 농장 확대로 오랑우탄의 마지막 서식지가 불탑니다." },
+            { name: "케냐", flag: "🇰🇪", desc: "극심한 가뭄으로 수많은 야생동물이 떼죽음을 당합니다." },
+            { name: "영국", flag: "🇬🇧", desc: "예측 불가능한 이상 기후와 대홍수가 빈번해집니다." },
+            { name: "독일", flag: "🇩🇪", desc: "역사적인 라인강이 바닥을 드러내며 말라버립니다." },
+            { name: "태국", flag: "🇹🇭", desc: "수도 방콕이 해수면 상승으로 완전히 침수됩니다." },
+            { name: "몽골", flag: "🇲🇳", desc: "푸른 초원이 황량한 사막으로 변해버립니다." },
+            { name: "멕시코", flag: "🇲🇽", desc: "지하수 고갈로 도시 지반이 무너져 내립니다." },
+            { name: "한국", flag: "🇰🇷", desc: "뚜렷했던 사계절이 사라지고 극한 기후가 일상이 됩니다." }
         ];
 
         let turn = 0; // 0~3
         let round = 1;
         const maxRound = 5;
-        let totalTurns = 0;
         let boardOwner = new Array(20).fill(0); // 0: 빈땅, 1~4: 플레이어
 
         // --- 초기화 ---
         window.onload = function() {
-            // 로딩 메시지 숨기고 게임 화면 표시
             document.getElementById('loading-msg').style.display = 'none';
             document.getElementById('game-ui').style.display = 'flex';
-            
             drawBoard();
             updateRank();
         };
@@ -305,7 +361,6 @@
         function drawBoard() {
             const grid = document.getElementById('board-grid');
             grid.innerHTML = "";
-            
             mapData.forEach((data, i) => {
                 const div = document.createElement('div');
                 div.className = "tile";
@@ -321,9 +376,7 @@
         }
 
         function drawTokens() {
-            // 기존 토큰 삭제
             document.querySelectorAll('.token').forEach(e => e.remove());
-
             players.forEach(p => {
                 const zone = document.getElementById(`zone-${p.pos}`);
                 if(zone) {
@@ -338,10 +391,7 @@
         function updateRank() {
             const list = document.getElementById('rank-list');
             list.innerHTML = "";
-            
-            // 점수순 정렬
-            let sorted = [...players].sort((a,b) => b.score - a.score);
-
+            let sorted = [...players].sort((a,b) => b.score - a.score || a.id - b.id);
             sorted.forEach((p, idx) => {
                 const isActive = (p.id === players[turn].id);
                 const div = document.createElement('div');
@@ -349,9 +399,9 @@
                 div.innerHTML = `
                     <div class="rank-num" style="color:${p.color}">${idx+1}</div>
                     <div class="rank-info">
-                        <div style="font-size:14px; display:flex; justify-content:space-between;">
+                        <div style="font-size:16px; font-weight:bold; display:flex; justify-content:space-between; margin-bottom:5px;">
                             <span>${p.name}</span>
-                            <span>${p.score}개 점령</span>
+                            <span style="color:${p.color}">${p.score}개</span>
                         </div>
                         <div class="rank-bar-bg">
                             <div class="rank-bar-fill" style="width:${p.score * 5}%; background:${p.color}"></div>
@@ -360,8 +410,6 @@
                 `;
                 list.appendChild(div);
             });
-
-            // 턴 정보 업데이트
             const turnP = players[turn];
             const txt = document.getElementById('turn-txt');
             txt.innerText = `${turnP.name}의 차례`;
@@ -373,8 +421,6 @@
             const btn = document.getElementById('roll-btn');
             const diceDiv = document.getElementById('dice-val');
             btn.disabled = true;
-
-            // 주사위 굴리는 연출
             let count = 0;
             const ani = setInterval(() => {
                 diceDiv.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)];
@@ -392,32 +438,34 @@
             const p = players[turn];
             p.pos = (p.pos + steps) % 20;
             drawTokens();
-
-            setTimeout(() => {
-                checkLand(p.pos);
-            }, 600);
+            setTimeout(() => { checkLand(p.pos); }, 600);
         }
 
         function checkLand(idx) {
-            // 이미 주인이 있는 경우
             if(boardOwner[idx] !== 0) {
                 const owner = players.find(p => p.id === boardOwner[idx]);
-                alert(`이미 ${owner.name}님이 개발한 땅입니다!`);
+                alert(`이미 ${owner.name}님이 개발하여 파괴된 지역입니다.`);
                 nextTurn();
             } else {
-                // 빈 땅이면 팝업
                 openModal(idx);
             }
         }
 
-        // --- 모달 로직 ---
+        // --- 모달 로직 (수정됨) ---
         let currentLandIdx = -1;
         
         function openModal(idx) {
             currentLandIdx = idx;
             const data = mapData[idx];
-            document.getElementById('modal-title').innerText = `${data.flag} ${data.name}`;
+            const p = players[turn];
+
+            // 모달 내용 업데이트
+            document.getElementById('modal-flag').innerText = data.flag;
+            document.getElementById('modal-title').innerText = data.name;
+            document.getElementById('modal-arrival-msg').innerText = `${p.name}이(가) 도착했습니다`;
+            document.getElementById('modal-arrival-msg').style.color = p.color;
             document.getElementById('modal-desc').innerText = data.desc;
+            
             document.getElementById('modal').style.display = 'flex';
         }
 
@@ -426,17 +474,13 @@
             const p = players[turn];
 
             if(develop) {
-                // 개발 선택
                 boardOwner[currentLandIdx] = p.id;
                 p.score++;
                 p.lands.push(mapData[currentLandIdx].name);
-                
-                // 타일 색 변경
                 const tile = document.getElementById(`tile-${currentLandIdx}`);
                 tile.classList.add(p.css);
-                tile.querySelector('.name').innerHTML += "<br>(개발됨)";
+                tile.querySelector('.name').innerHTML += "<br><span style='color:"+p.color+"; font-size:12px;'>(개발됨)</span>";
             } 
-            
             updateRank();
             nextTurn();
         }
@@ -446,13 +490,9 @@
             if(turn >= 4) {
                 turn = 0;
                 round++;
-                if(round > maxRound) {
-                    gameOver();
-                    return;
-                }
+                if(round > maxRound) { gameOver(); return; }
                 document.getElementById('round-txt').innerText = `ROUND ${round} / ${maxRound}`;
             }
-            
             updateRank();
             document.getElementById('roll-btn').disabled = false;
             document.getElementById('dice-val').innerText = "🎲";
@@ -462,24 +502,23 @@
         function gameOver() {
             const ending = document.getElementById('ending');
             const endingTxt = document.getElementById('ending-txt');
-            
-            // 모든 파괴된 땅 수집
             let allDestroyed = [];
             players.forEach(p => allDestroyed.push(...p.lands));
             
             let html = "";
             if(allDestroyed.length === 0) {
-                html = "지구는 안전합니다.<br>하지만 아무런 개발도 하지 않아 게임은 지루했죠?<br>이것이 우리가 나아가야 할 지속 가능한 미래입니다.";
+                html = "<h2 style='color:var(--green)'>🎉 지구를 지켜냈습니다! 🎉</h2><br>놀랍게도 아무도 개발을 선택하지 않았습니다.<br>게임은 지루했을지 몰라도, 당신들의 현명한 선택 덕분에 지구는 안전합니다.<br>이것이 바로 지속 가능한 미래입니다.";
             } else {
-                // 우승자 계산
-                let winner = players.reduce((prev, curr) => prev.score >= curr.score ? prev : curr);
-                
-                html = `<span style="color:${winner.color}; font-size:24px;">🏆 1등: ${winner.name} (${winner.score}개 개발)</span><hr style="border-color:#333; margin:20px 0;">`;
-                html += `당신들이 승리를 위해 달리는 동안...<br><br>`;
-                html += `<span style="color:#ff6b6b; font-weight:bold;">[ ${allDestroyed.join(', ')} ]</span><br><br>`;
-                html += `이 곳들은 영원히 파괴되었습니다.<br>당신은 게임에서 이겼지만, 우리는 살 곳을 잃었습니다.`;
+                let maxScore = Math.max(...players.map(p => p.score));
+                let winners = players.filter(p => p.score === maxScore);
+                let winnerText = winners.map(w => `<span style="color:${w.color}">${w.name}</span>`).join(', ');
+
+                html = `🏆 우승: ${winnerText} (총 ${maxScore}곳 개발)<br><hr style="border-color:#333; margin:30px 0;">`;
+                html += `당신들이 승리를 위해 경쟁하는 동안...<br><br>`;
+                html += `<span style="color:var(--red); font-weight:bold; font-size:22px;">[ ${allDestroyed.join(', ')} ]</span><br><br>`;
+                html += `총 <span style="color:var(--red); font-weight:bold;">${allDestroyed.length}개의 지역</span>이 영구적으로 파괴되었습니다.<br><br>`;
+                html += `<h3 style="color:var(--yellow);">"당신은 게임에서 이겼지만, 우리는 살 곳을 잃었습니다."</h3>`;
             }
-            
             endingTxt.innerHTML = html;
             ending.style.display = 'flex';
         }
