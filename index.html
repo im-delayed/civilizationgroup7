@@ -3,406 +3,486 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>개발 금지 - 지구를 지켜라</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <title>지구 개발 금지 게임</title>
     <style>
+        /* --- 스타일 시작 --- */
         :root {
             --bg-main: #1a1e2e;
             --bg-secondary: #252a3e;
             --bg-tertiary: #323852;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --accent-blue: #4c6ef5;
-            --accent-red: #f03e3e;
-            --accent-green: #40c057;
+            --text-white: #ffffff;
+            --text-gray: #a0aec0;
+            --blue: #4c6ef5;
+            --red: #fa5252;
+            --green: #40c057;
+            --yellow: #fcc419;
         }
 
         body {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; /* 기본 폰트 사용 */
             background-color: var(--bg-main);
-            color: var(--text-primary);
+            color: var(--text-white);
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            box-sizing: border-box;
+            overflow-x: hidden; /* 가로 스크롤 방지 */
         }
 
-        /* 헤더 */
+        /* 로딩 메시지 (JS 오류 시 보임) */
+        #loading-msg {
+            color: white;
+            font-size: 20px;
+            margin-top: 50px;
+            text-align: center;
+        }
+
         header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            width: 100%;
         }
 
-        h1 {
-            margin: 0;
-            font-size: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .round-info {
-            color: var(--text-secondary);
+        h1 { margin: 0; font-size: 24px; color: var(--text-white); }
+        .round-badge {
+            background: var(--bg-tertiary);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--text-gray);
             margin-top: 10px;
+            display: inline-block;
         }
 
-        /* 메인 컨텐츠 레이아웃 */
-        .main-content {
+        /* 메인 레이아웃 */
+        .game-container {
             display: flex;
-            gap: 30px;
+            gap: 20px;
             width: 100%;
             max-width: 1200px;
             justify-content: center;
             align-items: flex-start;
+            flex-wrap: wrap; /* 모바일 대응 */
         }
 
-        /* 게임 보드 */
-        #board-container {
+        /* 보드 (왼쪽) */
+        #board-grid {
             flex: 2;
+            min-width: 300px;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(5, 1fr); /* 5열 */
+            gap: 10px;
         }
 
+        /* 타일 스타일 */
         .tile {
             background-color: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 20px 15px;
+            border-radius: 10px;
+            aspect-ratio: 1/1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
             position: relative;
-            aspect-ratio: 1 / 1; /* 정사각형 유지 */
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            border: 2px solid transparent;
+            transition: 0.2s;
+            cursor: pointer;
         }
+
+        .tile:hover { transform: translateY(-2px); background-color: var(--bg-tertiary); }
         
-        .tile:hover {
-            transform: translateY(-3px);
-        }
-
-        .tile.occupied {
-            border: 2px solid var(--accent-blue);
-        }
+        .flag { font-size: 24px; margin-bottom: 5px; }
+        .name { font-size: 12px; font-weight: bold; text-align: center; }
         
-        .flag-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
+        /* 점령된 타일 효과 */
+        .tile.p1-land { border-color: var(--red); background: rgba(250, 82, 82, 0.1); }
+        .tile.p2-land { border-color: var(--blue); background: rgba(76, 110, 245, 0.1); }
+        .tile.p3-land { border-color: var(--green); background: rgba(64, 192, 87, 0.1); }
+        .tile.p4-land { border-color: #be4bdb; background: rgba(190, 75, 219, 0.1); }
 
-        .country-name {
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        /* 플레이어 토큰 */
-        .tokens-container {
+        /* 플레이어 말 (토큰) */
+        .token-zone {
             position: absolute;
-            bottom: 10px;
+            bottom: 5px;
             display: flex;
-            gap: 5px;
+            gap: 2px;
         }
-
-        .player-token {
-            width: 20px;
-            height: 20px;
+        .token {
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 10px;
-            font-weight: bold;
-            color: white;
-            border: 2px solid var(--bg-secondary);
+            border: 1px solid white;
         }
 
-        /* 사이드바 (순위표 및 컨트롤) */
+        /* 사이드바 (오른쪽) */
         #sidebar {
             flex: 1;
-            max-width: 350px;
+            min-width: 280px;
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
         .panel {
-            background-color: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        .panel h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 20px;
+        /* 순위표 */
+        .rank-item {
             display: flex;
             align-items: center;
-            gap: 10px;
+            background: var(--bg-tertiary);
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            border-left: 5px solid transparent;
         }
-
-        /* 순위표 리스트 */
-        .player-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .player-card {
-            display: flex;
-            align-items: center;
-            background-color: var(--bg-tertiary);
-            padding: 15px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .player-card.active {
-            background-color: var(--accent-blue);
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(76, 110, 245, 0.3);
-        }
+        .rank-item.active { border-left-color: white; background: #3b4259; }
         
-        .rank-badge {
-            width: 30px;
-            height: 30px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            margin-right: 15px;
-            background-color: rgba(255,255,255,0.1);
-        }
-
-        .player-info {
-            flex-grow: 1;
-        }
-
-        .player-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .player-stats {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        .player-card.active .player-stats {
-            color: rgba(255,255,255,0.8);
-        }
+        .rank-num { font-weight: bold; width: 20px; margin-right: 10px; }
+        .rank-info { flex: 1; }
+        .rank-bar-bg { width: 100%; height: 6px; background: #555; border-radius: 3px; margin-top: 5px; }
+        .rank-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
 
         /* 컨트롤 패널 */
-        #control-panel {
-            text-align: center;
-        }
+        .control-box { text-align: center; }
+        #dice-val { font-size: 40px; margin: 15px 0; height: 50px; }
         
-        #dice-display {
-            font-size: 48px;
-            margin: 20px 0;
-            height: 60px;
-        }
-
-        .btn-main {
-            background-color: var(--accent-blue);
-            color: white;
-            border: none;
-            padding: 15px 30px;
+        #roll-btn {
+            width: 100%;
+            padding: 15px;
             font-size: 18px;
             font-weight: bold;
-            border-radius: 12px;
+            color: white;
+            background: var(--blue);
+            border: none;
+            border-radius: 10px;
             cursor: pointer;
-            width: 100%;
-            transition: background-color 0.2s;
         }
-        .btn-main:hover { background-color: #3b5bdb; }
-        .btn-main:disabled { background-color: var(--bg-tertiary); color: var(--text-secondary); cursor: not-allowed; }
+        #roll-btn:disabled { background: #555; cursor: not-allowed; }
 
-        /* 모달 */
-        #modal-overlay {
-            display: none;
+        /* 모달창 (팝업) */
+        #modal {
+            display: none; /* 기본 숨김 */
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 100;
+            background: rgba(0,0,0,0.8);
+            z-index: 999;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
         }
-
-        #modal-box {
+        .modal-content {
             background: var(--bg-secondary);
-            border-radius: 20px;
-            padding: 40px;
+            padding: 30px;
+            border-radius: 15px;
             width: 90%;
-            max-width: 500px;
+            max-width: 400px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 2px solid var(--accent-red);
+            border: 2px solid var(--red);
+            box-shadow: 0 0 20px rgba(250, 82, 82, 0.4);
         }
-
-        .warning-title {
-            color: var(--accent-red);
-            font-size: 24px;
+        .warning-blink {
+            color: var(--red);
             font-weight: bold;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            animation: blink 1s infinite;
+            margin-bottom: 10px;
         }
+        @keyframes blink { 50% { opacity: 0.5; } }
 
-        .btn-develop {
-            background: linear-gradient(135deg, #ffc107, #ff9800);
-            color: #000;
-            font-size: 18px;
-            font-weight: bold;
-            padding: 18px 30px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 6px rgba(255, 152, 0, 0.3);
-        }
-        
-        .btn-preserve {
-            background: transparent;
-            color: var(--text-secondary);
-            border: 2px solid var(--text-secondary);
-            padding: 12px 20px;
-            border-radius: 12px;
-            cursor: pointer;
-            width: 100%;
-        }
-        .btn-preserve:hover {
-            color: var(--text-primary);
-            border-color: var(--text-primary);
-        }
+        .btn-yes { background: linear-gradient(45deg, #ffc107, #ff9800); color: black; width: 100%; padding: 15px; border:none; border-radius: 8px; font-weight:bold; font-size:16px; margin-bottom: 10px; cursor: pointer; }
+        .btn-no { background: transparent; color: #aaa; border: 1px solid #aaa; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; }
 
         /* 엔딩 화면 */
-        #ending-screen {
+        #ending {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            color: var(--accent-red);
-            z-index: 200;
+            background: black;
+            z-index: 1000;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 40px;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🌍 개발 금지 🌍</h1>
-        <div class="round-info" id="round-display">라운드 1 / 5</div>
+        <h1>🌍 개발 금지 구역 🌍</h1>
+        <div class="round-badge" id="round-txt">ROUND 1 / 5</div>
     </header>
 
-    <div class="main-content">
-        <div id="board-container">
-            </div>
+    <div id="loading-msg">게임을 불러오는 중입니다...<br>(화면이 계속 이 상태라면 새로고침 해주세요)</div>
+
+    <div class="game-container" id="game-ui" style="display:none;">
+        <div id="board-grid"></div>
 
         <div id="sidebar">
             <div class="panel">
-                <h2>👑 순위표</h2>
-                <div class="player-list" id="ranking-list">
-                    </div>
-                <p style="text-align: center; color: var(--text-secondary); margin-top: 20px; font-size: 14px;">
-                    각 플레이어 5턴 후 게임 종료
-                </p>
+                <h3>📊 실시간 순위</h3>
+                <div id="rank-list"></div>
             </div>
 
-            <div class="panel" id="control-panel">
-                <h2 id="current-turn-player">플레이어 1의 차례</h2>
-                <div id="dice-display">🎲</div>
-                <button id="roll-btn" class="btn-main" onclick="rollDice()">주사위 굴리기</button>
+            <div class="panel control-box">
+                <h3 id="turn-txt" style="color:var(--red)">플레이어 1의 차례</h3>
+                <div id="dice-val">🎲</div>
+                <button id="roll-btn" onclick="rollDice()">주사위 굴리기</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-overlay">
-        <div id="modal-box">
-            <div class="warning-title">⚠️ 경고: 개발 제한 구역 ⚠️</div>
-            <h2 id="modal-title" style="font-size: 28px; margin: 10px 0;">지역 이름</h2>
-            <p id="modal-desc" style="color: var(--text-secondary); margin-bottom: 30px;">이곳은 심각한 환경 파괴 위기에 처해 있습니다.</p>
-            
-            <button class="btn-develop" onclick="makeChoice(true)">
-                🚫 경고를 무시하고 개발한다 (+1점)
-            </button>
-            <button class="btn-preserve" onclick="makeChoice(false)">
-                개발을 포기하고 보존한다 (점수 없음)
-            </button>
+    <div id="modal">
+        <div class="modal-content">
+            <div class="warning-blink">⚠️ 경고: 생태계 파괴 위험 ⚠️</div>
+            <h2 id="modal-title">지역 이름</h2>
+            <p id="modal-desc" style="color:#ccc; font-size:14px; margin-bottom:20px;">설명</p>
+            <button class="btn-yes" onclick="decide(true)">⛔ 경고 무시하고 개발 (+1점)</button>
+            <button class="btn-no" onclick="decide(false)">보존하기 (점수 없음)</button>
         </div>
     </div>
 
-    <div id="ending-screen">
-        <h1 style="font-size: 50px; margin-bottom: 20px;">GAME OVER</h1>
-        <div id="ending-message" style="font-size: 20px; line-height: 1.6; color: #fff; max-width: 700px;"></div>
-        <button onclick="location.reload()" class="btn-main" style="margin-top:50px; background-color: var(--accent-red);">처음으로 되돌리기</button>
+    <div id="ending">
+        <h1 style="color:var(--red); font-size:40px;">GAME OVER</h1>
+        <div id="ending-txt" style="color:white; max-width:600px; line-height:1.6; margin-top:20px;"></div>
+        <button onclick="location.reload()" style="margin-top:30px; padding:10px 20px; background:#333; color:white; border:1px solid #555;">처음으로</button>
     </div>
 
     <script>
-        // --- 데이터 ---
+        // --- 데이터 설정 ---
         const players = [
-            { id: 1, name: "플레이어 1", color: "#f03e3e", pos: 0, score: 0, lands: [], turnsLeft: 5 },
-            { id: 2, name: "플레이어 2", color: "#4c6ef5", pos: 0, score: 0, lands: [], turnsLeft: 5 },
-            { id: 3, name: "플레이어 3", color: "#40c057", pos: 0, score: 0, lands: [], turnsLeft: 5 },
-            { id: 4, name: "플레이어 4", color: "#be4bdb", pos: 0, score: 0, lands: [], turnsLeft: 5 }
+            { id: 1, name: "P1", color: "#fa5252", pos: 0, score: 0, lands: [], css: "p1-land" },
+            { id: 2, name: "P2", color: "#4c6ef5", pos: 0, score: 0, lands: [], css: "p2-land" },
+            { id: 3, name: "P3", color: "#40c057", pos: 0, score: 0, lands: [], css: "p3-land" },
+            { id: 4, name: "P4", color: "#be4bdb", pos: 0, score: 0, lands: [], css: "p4-land" }
         ];
-        
-        const maxRounds = 5;
-        let currentRound = 1;
-        let currentPlayerIdx = 0;
-        let totalTurnsPlayed = 0;
-        
-        // 맵 데이터 (20개 국가)
+
         const mapData = [
-            { name: "브라질", flag: "🇧🇷", desc: "아마존 열대우림. 지구의 허파가 불타고 있습니다." },
-            { name: "인도네시아", flag: "🇮🇩", desc: "팜유 농장 확대로 열대우림과 오랑우탄 서식지가 파괴되고 있습니다." },
-            { name: "콩고", flag: "🇨🇩", desc: "콩고 분지 열대우림. 아프리카의 거대한 탄소 저장소입니다." },
-            { name: "호주", flag: "🇦🇺", desc: "그레이트 배리어 리프. 산호 백화 현상으로 죽어가고 있습니다." },
-            { name: "일본", flag: "🇯🇵", desc: "후쿠시마 원전 사고 이후 방사능 오염수 문제가 지속되고 있습니다." },
-            { name: "미국", flag: "🇺🇸", desc: "알래스카 영구동토층이 녹으며 막대한 메탄가스가 방출될 위기입니다." },
-            { name: "중국", flag: "🇨🇳", desc: "세계 최대의 탄소 배출국. 심각한 대기 오염을 겪고 있습니다." },
-            { name: "러시아", flag: "🇷🇺", desc: "시베리아 툰드라 지역의 대형 산불이 빈번해지고 있습니다." },
-            { name: "인도", flag: "🇮🇳", desc: "히말라야 빙하가 녹아내려 수자원 위기가 예상됩니다." },
-            { name: "나이지리아", flag: "🇳🇬", desc: "나이저 델타의 석유 유출로 심각한 토양 및 수질 오염이 발생했습니다." },
-            { name: "멕시코", flag: "🇲🇽", desc: "지하수 과다 사용으로 멕시코시티가 가라앉고 있습니다." },
-            { name: "영국", flag: "🇬🇧", desc: "산업혁명의 발상지. 과거의 오염과 현재의 기후위기 책임이 있습니다." },
-            { name: "캐나다", flag: "🇨🇦", desc: "오일샌드 채굴로 광범위한 산림이 파괴되고 있습니다." },
-            { name: "사우디", flag: "🇸🇦", desc: "사막화가 가속화되고 있으며, 화석 연료 의존도가 매우 높습니다." },
-            { name: "한국", flag: "🇰🇷", desc: "높은 인구 밀도와 에너지 소비로 1인당 탄소 배출량이 높습니다." },
-            { name: "독일", flag: "🇩🇪", desc: "탈원전과 재생에너지 전환 과도기에서 탄소 배출 딜레마를 겪고 있습니다." },
-            { name: "이집트", flag: "🇪🇬", desc: "나일강 삼각주가 해수면 상승으로 침수 위기에 처해 있습니다." },
-            { name: "태국", flag: "🇹🇭", desc: "방콕이 해수면 상승과 지반 침하로 물에 잠길 위험이 있습니다." },
-            { name: "아르헨티나", flag: "🇦🇷", desc: "파타고니아 빙하가 빠르게 녹아내리고 있습니다." },
-            { name: "남극", flag: "🇦🇶", desc: "지구 온난화의 최전선. 거대한 빙하가 붕괴되고 있습니다." }
+            { name: "브라질", flag: "🇧🇷", desc: "아마존 밀림이 불타고 있습니다." },
+            { name: "호주", flag: "🇦🇺", desc: "산호초가 하얗게 죽어가고 있습니다." },
+            { name: "콩고", flag: "🇨🇩", desc: "열대우림이 훼손되고 있습니다." },
+            { name: "남극", flag: "🇦🇶", desc: "빙하가 녹아 펭귄이 집을 잃었습니다." },
+            { name: "인도", flag: "🇮🇳", desc: "심각한 대기오염으로 고통받고 있습니다." },
+            { name: "중국", flag: "🇨🇳", desc: "사막화가 도심까지 번지고 있습니다." },
+            { name: "미국", flag: "🇺🇸", desc: "허리케인이 매년 강력해지고 있습니다." },
+            { name: "러시아", flag: "🇷🇺", desc: "영구동토층이 녹아 메탄이 나옵니다." },
+            { name: "북극", flag: "🐻‍❄️", desc: "북극곰이 사냥터를 잃었습니다." },
+            { name: "일본", flag: "🇯🇵", desc: "해양 생태계가 위협받고 있습니다." },
+            { name: "몰디브", flag: "🇲🇻", desc: "나라 전체가 물에 잠기고 있습니다." },
+            { name: "캐나다", flag: "🇨🇦", desc: "오일 샌드 채굴로 숲이 사라집니다." },
+            { name: "인니", flag: "🇮🇩", desc: "오랑우탄 숲이 팜유 농장이 되었습니다." },
+            { name: "케냐", flag: "🇰🇪", desc: "가뭄으로 야생동물이 죽고 있습니다." },
+            { name: "영국", flag: "🇬🇧", desc: "이상 기후로 홍수가 잦아졌습니다." },
+            { name: "독일", flag: "🇩🇪", desc: "라인강 수위가 말라가고 있습니다." },
+            { name: "태국", flag: "🇹🇭", desc: "수도가 해수면 상승 위협을 받습니다." },
+            { name: "몽골", flag: "🇲🇳", desc: "초원이 사막으로 변하고 있습니다." },
+            { name: "멕시코", flag: "🇲🇽", desc: "지하수 고갈로 땅이 꺼지고 있습니다." },
+            { name: "한국", flag: "🇰🇷", desc: "사계절이 사라지고 있습니다." }
         ];
 
-        const boardState = new Array(mapData.length).fill(null);
+        let turn = 0; // 0~3
+        let round = 1;
+        const maxRound = 5;
+        let totalTurns = 0;
+        let boardOwner = new Array(20).fill(0); // 0: 빈땅, 1~4: 플레이어
 
-        // --- 초기화 및 렌더링 ---
-        function initGame() {
-            renderBoard();
-            updateUI();
+        // --- 초기화 ---
+        window.onload = function() {
+            // 로딩 메시지 숨기고 게임 화면 표시
+            document.getElementById('loading-msg').style.display = 'none';
+            document.getElementById('game-ui').style.display = 'flex';
+            
+            drawBoard();
+            updateRank();
+        };
+
+        function drawBoard() {
+            const grid = document.getElementById('board-grid');
+            grid.innerHTML = "";
+            
+            mapData.forEach((data, i) => {
+                const div = document.createElement('div');
+                div.className = "tile";
+                div.id = `tile-${i}`;
+                div.innerHTML = `
+                    <div class="flag">${data.flag}</div>
+                    <div class="name">${data.name}</div>
+                    <div class="token-zone" id="zone-${i}"></div>
+                `;
+                grid.appendChild(div);
+            });
+            drawTokens();
         }
 
-        function renderBoard() {
-            const boardEl = document.getElementById('board-container');
-            boardEl.innerHTML = '';
-            mapData.forEach((tile, index) => {
+        function drawTokens() {
+            // 기존 토큰 삭제
+            document.querySelectorAll('.token').forEach(e => e.remove());
+
+            players.forEach(p => {
+                const zone = document.getElementById(`zone-${p.pos}`);
+                if(zone) {
+                    const t = document.createElement('div');
+                    t.className = "token";
+                    t.style.backgroundColor = p.color;
+                    zone.appendChild(t);
+                }
+            });
+        }
+
+        function updateRank() {
+            const list = document.getElementById('rank-list');
+            list.innerHTML = "";
+            
+            // 점수순 정렬
+            let sorted = [...players].sort((a,b) => b.score - a.score);
+
+            sorted.forEach((p, idx) => {
+                const isActive = (p.id === players[turn].id);
                 const div = document.createElement('div');
-                div.className = 'tile';
-                div.id = `tile-${index}`;
+                div.className = `rank-item ${isActive ? 'active' : ''}`;
                 div.innerHTML = `
+                    <div class="rank-num" style="color:${p.color}">${idx+1}</div>
+                    <div class="rank-info">
+                        <div style="font-size:14px; display:flex; justify-content:space-between;">
+                            <span>${p.name}</span>
+                            <span>${p.score}개 점령</span>
+                        </div>
+                        <div class="rank-bar-bg">
+                            <div class="rank-bar-fill" style="width:${p.score * 5}%; background:${p.color}"></div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            // 턴 정보 업데이트
+            const turnP = players[turn];
+            const txt = document.getElementById('turn-txt');
+            txt.innerText = `${turnP.name}의 차례`;
+            txt.style.color = turnP.color;
+        }
+
+        // --- 게임 진행 ---
+        function rollDice() {
+            const btn = document.getElementById('roll-btn');
+            const diceDiv = document.getElementById('dice-val');
+            btn.disabled = true;
+
+            // 주사위 굴리는 연출
+            let count = 0;
+            const ani = setInterval(() => {
+                diceDiv.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)];
+                count++;
+                if(count > 8) {
+                    clearInterval(ani);
+                    const val = Math.floor(Math.random() * 6) + 1;
+                    diceDiv.innerText = `🎲 ${val}`;
+                    movePlayer(val);
+                }
+            }, 80);
+        }
+
+        function movePlayer(steps) {
+            const p = players[turn];
+            p.pos = (p.pos + steps) % 20;
+            drawTokens();
+
+            setTimeout(() => {
+                checkLand(p.pos);
+            }, 600);
+        }
+
+        function checkLand(idx) {
+            // 이미 주인이 있는 경우
+            if(boardOwner[idx] !== 0) {
+                const owner = players.find(p => p.id === boardOwner[idx]);
+                alert(`이미 ${owner.name}님이 개발한 땅입니다!`);
+                nextTurn();
+            } else {
+                // 빈 땅이면 팝업
+                openModal(idx);
+            }
+        }
+
+        // --- 모달 로직 ---
+        let currentLandIdx = -1;
+        
+        function openModal(idx) {
+            currentLandIdx = idx;
+            const data = mapData[idx];
+            document.getElementById('modal-title').innerText = `${data.flag} ${data.name}`;
+            document.getElementById('modal-desc').innerText = data.desc;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function decide(develop) {
+            document.getElementById('modal').style.display = 'none';
+            const p = players[turn];
+
+            if(develop) {
+                // 개발 선택
+                boardOwner[currentLandIdx] = p.id;
+                p.score++;
+                p.lands.push(mapData[currentLandIdx].name);
+                
+                // 타일 색 변경
+                const tile = document.getElementById(`tile-${currentLandIdx}`);
+                tile.classList.add(p.css);
+                tile.querySelector('.name').innerHTML += "<br>(개발됨)";
+            } 
+            
+            updateRank();
+            nextTurn();
+        }
+
+        function nextTurn() {
+            turn++;
+            if(turn >= 4) {
+                turn = 0;
+                round++;
+                if(round > maxRound) {
+                    gameOver();
+                    return;
+                }
+                document.getElementById('round-txt').innerText = `ROUND ${round} / ${maxRound}`;
+            }
+            
+            updateRank();
+            document.getElementById('roll-btn').disabled = false;
+            document.getElementById('dice-val').innerText = "🎲";
+        }
+
+        // --- 게임 오버 ---
+        function gameOver() {
+            const ending = document.getElementById('ending');
+            const endingTxt = document.getElementById('ending-txt');
+            
+            // 모든 파괴된 땅 수집
+            let allDestroyed = [];
+            players.forEach(p => allDestroyed.push(...p.lands));
+            
+            let html = "";
+            if(allDestroyed.length === 0) {
+                html = "지구는 안전합니다.<br>하지만 아무런 개발도 하지 않아 게임은 지루했죠?<br>이것이 우리가 나아가야 할 지속 가능한 미래입니다.";
+            } else {
+                // 우승자 계산
+                let winner = players.reduce((prev, curr) => prev.score >= curr.score ? prev : curr);
+                
+                html = `<span style="color:${winner.color}; font-size:24px;">🏆 1등: ${winner.name} (${winner.score}개 개발)</span><hr style="border-color:#333; margin:20px 0;">`;
+                html += `당신들이 승리를 위해 달리는 동안...<br><br>`;
+                html += `<span style="color:#ff6b6b; font-weight:bold;">[ ${allDestroyed.join(', ')} ]</span><br><br>`;
+                html += `이 곳들은 영원히 파괴되었습니다.<br>당신은 게임에서 이겼지만, 우리는 살 곳을 잃었습니다.`;
+            }
+            
+            endingTxt.innerHTML = html;
+            ending.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
