@@ -17,12 +17,13 @@
             --dark-red: #c92a2a;
             --green: #40c057;
             --yellow: #fcc419;
-            --modal-bg: #1e2337; /* 모달 배경색 */
-            --warning-bg: rgba(250, 82, 82, 0.15); /* 경고 박스 배경색 */
+            --modal-bg: #1e2337;
+            --warning-bg: rgba(250, 82, 82, 0.15);
+            --info-bg: rgba(76, 110, 245, 0.15); /* 정보창 배경 */
         }
 
         body {
-            font-family: 'Pretendard', 'Malgun Gothic', sans-serif; /* 폰트 변경 */
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
             background-color: var(--bg-main);
             color: var(--text-white);
             margin: 0;
@@ -34,7 +35,6 @@
             overflow-x: hidden;
         }
 
-        /* 로딩 메시지 */
         #loading-msg {
             color: white;
             font-size: 20px;
@@ -59,7 +59,6 @@
             display: inline-block;
         }
 
-        /* 메인 레이아웃 */
         .game-container {
             display: flex;
             gap: 30px;
@@ -70,7 +69,6 @@
             flex-wrap: wrap;
         }
 
-        /* 보드 (왼쪽) */
         #board-grid {
             flex: 2;
             min-width: 320px;
@@ -79,7 +77,6 @@
             gap: 15px;
         }
 
-        /* 타일 스타일 */
         .tile {
             background-color: var(--bg-secondary);
             border-radius: 16px;
@@ -91,7 +88,7 @@
             position: relative;
             border: 3px solid transparent;
             transition: 0.3s ease;
-            cursor: pointer;
+            cursor: pointer; /* 클릭 가능 표시 */
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
@@ -100,13 +97,11 @@
         .flag { font-size: 40px; margin-bottom: 10px; }
         .name { font-size: 14px; font-weight: bold; text-align: center; }
         
-        /* 점령된 타일 효과 */
         .tile.p1-land { border-color: var(--red); background: rgba(250, 82, 82, 0.1); }
         .tile.p2-land { border-color: var(--blue); background: rgba(76, 110, 245, 0.1); }
         .tile.p3-land { border-color: var(--green); background: rgba(64, 192, 87, 0.1); }
         .tile.p4-land { border-color: #be4bdb; background: rgba(190, 75, 219, 0.1); }
 
-        /* 플레이어 말 (토큰) */
         .token-zone {
             position: absolute;
             bottom: 8px;
@@ -121,7 +116,6 @@
             box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
 
-        /* 사이드바 (오른쪽) */
         #sidebar {
             flex: 1;
             min-width: 300px;
@@ -137,7 +131,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
-        /* 순위표 */
         .rank-item {
             display: flex;
             align-items: center;
@@ -155,7 +148,6 @@
         .rank-bar-bg { width: 100%; height: 8px; background: #555; border-radius: 4px; margin-top: 8px; overflow: hidden; }
         .rank-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease-in-out; }
 
-        /* 컨트롤 패널 */
         .control-box { text-align: center; }
         #dice-val { font-size: 60px; margin: 20px 0; height: 70px; display: flex; justify-content: center; align-items: center; }
         
@@ -175,17 +167,18 @@
         #roll-btn:hover { background: #3b5bdb; box-shadow: 0 2px 0 #364fc7; transform: translateY(2px); }
         #roll-btn:disabled { background: #555; box-shadow: none; cursor: not-allowed; transform: none; }
 
-        /* --- 모달창 (팝업) 디자인 수정 --- */
-        #modal {
+        /* --- 공통 모달 디자인 --- */
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); /* 더 어두운 배경 */
+            background: rgba(0,0,0,0.85);
             z-index: 999;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px); /* 블러 효과 */
+            backdrop-filter: blur(5px);
         }
+        
         .modal-content {
             background: var(--modal-bg);
             padding: 40px;
@@ -193,26 +186,31 @@
             width: 90%;
             max-width: 450px;
             text-align: center;
-            border: 2px solid var(--red);
-            box-shadow: 0 0 30px rgba(250, 82, 82, 0.3);
             position: relative;
-            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
+
+        /* 개발 경고 모달 (Red) */
+        #game-modal .modal-content { border: 2px solid var(--red); box-shadow: 0 0 30px rgba(250, 82, 82, 0.3); }
+        /* 단순 정보 모달 (Blue) */
+        #info-modal .modal-content { border: 2px solid var(--blue); box-shadow: 0 0 30px rgba(76, 110, 245, 0.3); }
         
         .modal-flag { font-size: 60px; margin-bottom: 10px; }
-        #modal-title { font-size: 28px; font-weight: bold; margin-bottom: 5px; }
+        .modal-title { font-size: 28px; font-weight: bold; margin-bottom: 5px; }
         .arrival-msg { color: var(--blue); font-size: 16px; margin-bottom: 30px; }
 
-        .warning-box {
-            background: var(--warning-bg);
-            border: 2px solid var(--red);
+        /* 경고/정보 박스 */
+        .desc-box {
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 25px;
             text-align: left;
         }
-        .warning-title { color: var(--red); font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        #modal-desc { color: var(--text-white); font-size: 16px; line-height: 1.5; margin: 0; }
+        .warn-style { background: var(--warning-bg); border: 2px solid var(--red); }
+        .info-style { background: var(--info-bg); border: 2px solid var(--blue); }
+
+        .box-header { font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .modal-desc-text { color: var(--text-white); font-size: 16px; line-height: 1.5; margin: 0; }
 
         .fatal-warning {
             color: var(--yellow);
@@ -234,11 +232,15 @@
         .extra-warning { color: var(--yellow); font-size: 14px; margin-bottom: 5px; }
         .game-rule { color: var(--text-gray); font-size: 14px; margin-bottom: 25px; }
 
-        .btn-no { 
+        .btn-no, .btn-close { 
             background: transparent; color: var(--text-gray); border: 2px solid var(--text-gray); 
             width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 16px; transition: 0.2s; 
         }
-        .btn-no:hover { border-color: var(--text-white); color: var(--text-white); background: rgba(255,255,255,0.1); }
+        .btn-no:hover, .btn-close:hover { border-color: var(--text-white); color: var(--text-white); background: rgba(255,255,255,0.1); }
+        
+        /* 닫기 버튼 전용 */
+        .btn-close { border-color: var(--blue); color: var(--blue); margin-top: 10px; }
+        .btn-close:hover { background: rgba(76, 110, 245, 0.2); color: white; }
 
         /* 엔딩 화면 */
         #ending {
@@ -282,15 +284,15 @@
         </div>
     </div>
 
-    <div id="modal">
+    <div id="game-modal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-flag" id="modal-flag">🇧🇷</div>
-            <h2 id="modal-title">브라질</h2>
-            <p class="arrival-msg" id="modal-arrival-msg">플레이어 1이(가) 도착했습니다</p>
+            <div class="modal-flag" id="g-modal-flag">🇧🇷</div>
+            <h2 class="modal-title" id="g-modal-title">브라질</h2>
+            <p class="arrival-msg" id="g-modal-arrival-msg">플레이어 1이(가) 도착했습니다</p>
 
-            <div class="warning-box">
-                <div class="warning-title">⚠️ 환경 경고</div>
-                <p id="modal-desc">아마존 열대우림이 파괴됩니다</p>
+            <div class="desc-box warn-style">
+                <div class="box-header" style="color:var(--red)">⚠️ 환경 경고</div>
+                <p class="modal-desc-text" id="g-modal-desc">내용</p>
             </div>
 
             <div class="fatal-warning">💀 되돌릴 수 없습니다 💀</div>
@@ -306,6 +308,20 @@
         </div>
     </div>
 
+    <div id="info-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-flag" id="i-modal-flag">🇧🇷</div>
+            <h2 class="modal-title" id="i-modal-title">브라질</h2>
+            
+            <div class="desc-box info-style" style="margin-top: 20px;">
+                <div class="box-header" style="color:var(--blue)">ℹ️ 지역 정보</div>
+                <p class="modal-desc-text" id="i-modal-desc">내용</p>
+            </div>
+
+            <button class="btn-close" onclick="closeInfo()">닫기</button>
+        </div>
+    </div>
+
     <div id="ending">
         <h1 style="color:var(--red); font-size:50px; margin-bottom: 30px;">GAME OVER</h1>
         <div id="ending-txt" style="color:white; max-width:700px; line-height:1.8; font-size: 18px;"></div>
@@ -313,7 +329,6 @@
     </div>
 
     <script>
-        // --- 데이터 설정 ---
         const players = [
             { id: 1, name: "플레이어 1", color: "#fa5252", pos: 0, score: 0, lands: [], css: "p1-land" },
             { id: 2, name: "플레이어 2", color: "#4c6ef5", pos: 0, score: 0, lands: [], css: "p2-land" },
@@ -321,7 +336,6 @@
             { id: 4, name: "플레이어 4", color: "#be4bdb", pos: 0, score: 0, lands: [], css: "p4-land" }
         ];
 
-        // 맵 데이터 (더 강력한 문구로 수정)
         const mapData = [
             { name: "중국", flag: "🇨🇳", desc: "희토류 정제 과정의 방사능 폐수가 독성 호수를 만듭니다." },
             { name: "미국", flag: "🇺🇸", desc: "자국 이익을 위해 환경 규제를 무시하고 자연을 파헤칩니다." },
@@ -341,12 +355,11 @@
             { name: "부산", flag: "🇰🇷", desc: "무분별한 바다 모래 채취로 해안선이 무너져 내립니다." }
         ];
 
-        let turn = 0; // 0~3
+        let turn = 0; 
         let round = 1;
         const maxRound = 5;
-        let boardOwner = new Array(20).fill(0); // 0: 빈땅, 1~4: 플레이어
+        let boardOwner = new Array(20).fill(0);
 
-        // --- 초기화 ---
         window.onload = function() {
             document.getElementById('loading-msg').style.display = 'none';
             document.getElementById('game-ui').style.display = 'flex';
@@ -361,6 +374,8 @@
                 const div = document.createElement('div');
                 div.className = "tile";
                 div.id = `tile-${i}`;
+                // onclick 이벤트 추가: 클릭 시 정보창 열기
+                div.setAttribute('onclick', `showInfo(${i})`); 
                 div.innerHTML = `
                     <div class="flag">${data.flag}</div>
                     <div class="name">${data.name}</div>
@@ -412,7 +427,6 @@
             txt.style.color = turnP.color;
         }
 
-        // --- 게임 진행 ---
         function rollDice() {
             const btn = document.getElementById('roll-btn');
             const diceDiv = document.getElementById('dice-val');
@@ -432,7 +446,7 @@
 
         function movePlayer(steps) {
             const p = players[turn];
-            p.pos = (p.pos + steps) % 20;
+            p.pos = (p.pos + steps) % 16;
             drawTokens();
             setTimeout(() => { checkLand(p.pos); }, 600);
         }
@@ -443,30 +457,29 @@
                 alert(`이미 ${owner.name}님이 개발하여 파괴된 지역입니다.`);
                 nextTurn();
             } else {
-                openModal(idx);
+                openGameModal(idx);
             }
         }
 
-        // --- 모달 로직 (수정됨) ---
+        // --- 1. 게임 진행용 모달 (경고창) ---
         let currentLandIdx = -1;
         
-        function openModal(idx) {
+        function openGameModal(idx) {
             currentLandIdx = idx;
             const data = mapData[idx];
             const p = players[turn];
 
-            // 모달 내용 업데이트
-            document.getElementById('modal-flag').innerText = data.flag;
-            document.getElementById('modal-title').innerText = data.name;
-            document.getElementById('modal-arrival-msg').innerText = `${p.name}이(가) 도착했습니다`;
-            document.getElementById('modal-arrival-msg').style.color = p.color;
-            document.getElementById('modal-desc').innerText = data.desc;
+            document.getElementById('g-modal-flag').innerText = data.flag;
+            document.getElementById('g-modal-title').innerText = data.name;
+            document.getElementById('g-modal-arrival-msg').innerText = `${p.name}이(가) 도착했습니다`;
+            document.getElementById('g-modal-arrival-msg').style.color = p.color;
+            document.getElementById('g-modal-desc').innerText = data.desc;
             
-            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('game-modal').style.display = 'flex';
         }
 
         function decide(develop) {
-            document.getElementById('modal').style.display = 'none';
+            document.getElementById('game-modal').style.display = 'none';
             const p = players[turn];
 
             if(develop) {
@@ -479,6 +492,23 @@
             } 
             updateRank();
             nextTurn();
+        }
+
+        // --- 2. 단순 정보 확인용 모달 (파란색) ---
+        function showInfo(idx) {
+            // 주사위가 굴러가는 중이거나, 게임 모달이 떠있으면 클릭 무시 (선택 사항)
+            if(document.getElementById('game-modal').style.display === 'flex') return;
+
+            const data = mapData[idx];
+            document.getElementById('i-modal-flag').innerText = data.flag;
+            document.getElementById('i-modal-title').innerText = data.name;
+            document.getElementById('i-modal-desc').innerText = data.desc;
+
+            document.getElementById('info-modal').style.display = 'flex';
+        }
+
+        function closeInfo() {
+            document.getElementById('info-modal').style.display = 'none';
         }
 
         function nextTurn() {
@@ -494,7 +524,6 @@
             document.getElementById('dice-val').innerText = "🎲";
         }
 
-        // --- 게임 오버 ---
         function gameOver() {
             const ending = document.getElementById('ending');
             const endingTxt = document.getElementById('ending-txt');
