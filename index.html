@@ -99,10 +99,10 @@
 
         .footer-warn { color: var(--yellow); font-size: 13px; margin-top: 20px; font-weight: bold; animation: blink 2s infinite; }
 
-        /* --- 2. 게임 화면 스타일 (수정됨) --- */
+        /* --- 2. 게임 화면 스타일 --- */
         #game-ui { 
-            display: none; /* JS로 flex로 변경됨 */
-            flex-direction: column; /* [중요] 세로 정렬로 고정 */
+            display: none; 
+            flex-direction: column; /* 세로 정렬 유지 */
             align-items: center;
             width: 100%;
         }
@@ -113,7 +113,6 @@
 
         .game-container { display: flex; gap: 30px; width: 100%; max-width: 1200px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
         
-        /* 보드 스타일 */
         #board-grid { flex: 2; min-width: 320px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
 
         .tile { background-color: var(--bg-secondary); border-radius: 16px; aspect-ratio: 1/1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 3px solid transparent; transition: 0.3s ease; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -225,7 +224,7 @@
 
     <div id="game-ui">
         <header>
-            <h1>🌍 개발 금지 구역 🌍</h1>
+            <h1>🌍 두존구 🌍</h1>
             <div class="round-badge" id="round-txt">ROUND 1 / 5</div>
         </header>
 
@@ -293,6 +292,7 @@
             { id: 4, name: "플레이어 4", color: "#be4bdb", pos: 0, score: 0, lands: [], css: "p4-land" }
         ];
 
+        // 맵 데이터
         const mapData = [
             { name: "중국", flag: "🇨🇳", desc: "희토류 정제 과정의 방사능 폐수가 독성 호수를 만듭니다." },
             { name: "미국", flag: "🇺🇸", desc: "자국 이익을 위해 환경 규제를 무시하고 자연을 파헤칩니다." },
@@ -324,9 +324,13 @@
         }
 
         function initGame() {
-            players.forEach(p => {
-                p.pos = Math.floor(Math.random() * mapData.length);
+            // [수정됨] 시작 위치 지정 (중국(0), 서울(4), 칠레(8), 베트남(12))
+            const startLocations = [0, 4, 8, 12];
+            
+            players.forEach((p, index) => {
+                p.pos = startLocations[index];
             });
+
             drawBoard();
             updateRank();
         }
