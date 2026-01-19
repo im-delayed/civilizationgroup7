@@ -35,12 +35,11 @@
             overflow-x: hidden;
         }
 
-        /* 공통 버튼 스타일 */
         button { font-family: 'Pretendard', sans-serif; }
 
-        /* --- 1. 시작 화면 스타일 (New) --- */
+        /* --- 1. 시작 화면 스타일 --- */
         #start-screen {
-            display: flex; /* 초기에는 보임 */
+            display: flex;
             flex-direction: column;
             align-items: center;
             max-width: 500px;
@@ -100,14 +99,21 @@
 
         .footer-warn { color: var(--yellow); font-size: 13px; margin-top: 20px; font-weight: bold; animation: blink 2s infinite; }
 
-        /* --- 2. 게임 화면 스타일 (기존 유지) --- */
-        #game-ui { display: none; } /* 초기에는 숨김 */
+        /* --- 2. 게임 화면 스타일 (수정됨) --- */
+        #game-ui { 
+            display: none; /* JS로 flex로 변경됨 */
+            flex-direction: column; /* [중요] 세로 정렬로 고정 */
+            align-items: center;
+            width: 100%;
+        }
 
         header { text-align: center; margin-bottom: 20px; width: 100%; }
         h1 { margin: 0; font-size: 28px; color: var(--text-white); }
         .round-badge { background: var(--bg-tertiary); padding: 8px 20px; border-radius: 25px; font-size: 16px; color: var(--text-gray); margin-top: 15px; display: inline-block; }
 
         .game-container { display: flex; gap: 30px; width: 100%; max-width: 1200px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+        
+        /* 보드 스타일 */
         #board-grid { flex: 2; min-width: 320px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
 
         .tile { background-color: var(--bg-secondary); border-radius: 16px; aspect-ratio: 1/1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 3px solid transparent; transition: 0.3s ease; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -116,7 +122,6 @@
         .flag { font-size: 40px; margin-bottom: 10px; }
         .name { font-size: 14px; font-weight: bold; text-align: center; }
         
-        /* 점령 효과 */
         .tile.p1-land { border-color: var(--red); background: rgba(250, 82, 82, 0.1); }
         .tile.p2-land { border-color: var(--blue); background: rgba(76, 110, 245, 0.1); }
         .tile.p3-land { border-color: var(--green); background: rgba(64, 192, 87, 0.1); }
@@ -312,24 +317,16 @@
         const maxRound = 5;
         let boardOwner = new Array(20).fill(0);
 
-        // [추가됨] 게임 시작 버튼을 누르면 실행되는 함수
         function startGame() {
-            // 시작 화면 숨기기
             document.getElementById('start-screen').style.display = 'none';
-            // 게임 화면 보이기
             document.getElementById('game-ui').style.display = 'flex';
-            
-            // 레이아웃이 변경되었으므로 보드와 순위표를 그립니다
             initGame();
         }
 
-        // 게임 초기화
         function initGame() {
-            // 플레이어 위치 랜덤 설정
             players.forEach(p => {
                 p.pos = Math.floor(Math.random() * mapData.length);
             });
-
             drawBoard();
             updateRank();
         }
