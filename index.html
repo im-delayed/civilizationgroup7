@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>두존구</title>
+    <title>두존구 - 두 번의 존망을 구하는 게임</title>
     <style>
-        /* --- 스타일 시작 --- */
+        /* --- 스타일 정의 --- */
         :root {
             --bg-main: #1a1e2e;
             --bg-secondary: #252a3e;
@@ -18,8 +18,7 @@
             --green: #40c057;
             --yellow: #fcc419;
             --modal-bg: #1e2337;
-            --warning-bg: rgba(250, 82, 82, 0.15);
-            --info-bg: rgba(76, 110, 245, 0.15);
+            --warning-bg: rgba(250, 82, 82, 0.1);
         }
 
         body {
@@ -31,116 +30,105 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        #loading-msg {
-            color: white;
-            font-size: 20px;
-            margin-top: 50px;
-            text-align: center;
-        }
+        /* 공통 버튼 스타일 */
+        button { font-family: 'Pretendard', sans-serif; }
 
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-            width: 100%;
-        }
-
-        h1 { margin: 0; font-size: 28px; color: var(--text-white); }
-        .round-badge {
-            background: var(--bg-tertiary);
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-size: 16px;
-            color: var(--text-gray);
-            margin-top: 15px;
-            display: inline-block;
-        }
-
-        .game-container {
-            display: flex;
-            gap: 30px;
-            width: 100%;
-            max-width: 1200px;
-            justify-content: center;
-            align-items: flex-start;
-            flex-wrap: wrap;
-        }
-
-        #board-grid {
-            flex: 2;
-            min-width: 320px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-        }
-
-        .tile {
-            background-color: var(--bg-secondary);
-            border-radius: 16px;
-            aspect-ratio: 1/1;
-            display: flex;
+        /* --- 1. 시작 화면 스타일 (New) --- */
+        #start-screen {
+            display: flex; /* 초기에는 보임 */
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            position: relative;
-            border: 3px solid transparent;
-            transition: 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
         }
 
+        .start-logo { font-size: 60px; margin-bottom: 10px; animation: float 3s infinite ease-in-out; }
+        .game-title { font-size: 42px; font-weight: 800; margin: 0; letter-spacing: -1px; }
+        .game-subtitle { color: var(--text-gray); font-size: 16px; margin-top: 10px; margin-bottom: 40px; }
+
+        .start-warning-box {
+            background: rgba(26, 30, 46, 0.8);
+            border: 2px solid var(--red);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(250, 82, 82, 0.2);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .warn-header { color: var(--red); font-size: 18px; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .warn-text { font-size: 15px; line-height: 1.6; color: #ddd; word-break: keep-all; }
+        .warn-highlight { color: var(--red); font-weight: bold; }
+
+        .rules-box {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 25px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+            margin-bottom: 40px;
+        }
+        
+        .rules-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-gray); }
+        .rules-list { list-style: none; padding: 0; margin: 0; font-size: 14px; color: #ccc; line-height: 2.2; }
+        .rules-list li::before { content: "•"; color: var(--blue); margin-right: 8px; font-weight: bold; }
+
+        .btn-start {
+            width: 100%;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: 800;
+            color: white;
+            background: linear-gradient(135deg, #d93025, #b71c1c);
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(217, 48, 37, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .btn-start:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(217, 48, 37, 0.6); }
+
+        .footer-warn { color: var(--yellow); font-size: 13px; margin-top: 20px; font-weight: bold; animation: blink 2s infinite; }
+
+        /* --- 2. 게임 화면 스타일 (기존 유지) --- */
+        #game-ui { display: none; } /* 초기에는 숨김 */
+
+        header { text-align: center; margin-bottom: 20px; width: 100%; }
+        h1 { margin: 0; font-size: 28px; color: var(--text-white); }
+        .round-badge { background: var(--bg-tertiary); padding: 8px 20px; border-radius: 25px; font-size: 16px; color: var(--text-gray); margin-top: 15px; display: inline-block; }
+
+        .game-container { display: flex; gap: 30px; width: 100%; max-width: 1200px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+        #board-grid { flex: 2; min-width: 320px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+
+        .tile { background-color: var(--bg-secondary); border-radius: 16px; aspect-ratio: 1/1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 3px solid transparent; transition: 0.3s ease; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .tile:hover { transform: translateY(-5px); background-color: var(--bg-tertiary); box-shadow: 0 8px 12px rgba(0,0,0,0.2); }
         
         .flag { font-size: 40px; margin-bottom: 10px; }
         .name { font-size: 14px; font-weight: bold; text-align: center; }
         
+        /* 점령 효과 */
         .tile.p1-land { border-color: var(--red); background: rgba(250, 82, 82, 0.1); }
         .tile.p2-land { border-color: var(--blue); background: rgba(76, 110, 245, 0.1); }
         .tile.p3-land { border-color: var(--green); background: rgba(64, 192, 87, 0.1); }
         .tile.p4-land { border-color: #be4bdb; background: rgba(190, 75, 219, 0.1); }
 
-        .token-zone {
-            position: absolute;
-            bottom: 8px;
-            display: flex;
-            gap: 4px;
-        }
-        .token {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            border: 2px solid var(--bg-secondary);
-            box-shadow: 0 0 5px rgba(0,0,0,0.5);
-        }
+        .token-zone { position: absolute; bottom: 8px; display: flex; gap: 4px; }
+        .token { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--bg-secondary); box-shadow: 0 0 5px rgba(0,0,0,0.5); }
 
-        #sidebar {
-            flex: 1;
-            min-width: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
+        #sidebar { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 25px; }
+        .panel { background: var(--bg-secondary); border-radius: 20px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
-        .panel {
-            background: var(--bg-secondary);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .rank-item {
-            display: flex;
-            align-items: center;
-            background: var(--bg-tertiary);
-            margin-bottom: 12px;
-            padding: 15px;
-            border-radius: 15px;
-            border-left: 6px solid transparent;
-            transition: 0.3s;
-        }
+        .rank-item { display: flex; align-items: center; background: var(--bg-tertiary); margin-bottom: 12px; padding: 15px; border-radius: 15px; border-left: 6px solid transparent; transition: 0.3s; }
         .rank-item.active { border-left-color: var(--text-white); background: #3b4259; transform: scale(1.02); }
         
         .rank-num { font-weight: bold; font-size: 18px; width: 30px; margin-right: 15px; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); border-radius: 50%; height: 30px; }
@@ -151,44 +139,13 @@
         .control-box { text-align: center; }
         #dice-val { font-size: 60px; margin: 20px 0; height: 70px; display: flex; justify-content: center; align-items: center; }
         
-        #roll-btn {
-            width: 100%;
-            padding: 18px;
-            font-size: 20px;
-            font-weight: bold;
-            color: white;
-            background: var(--blue);
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 4px 0 #364fc7;
-        }
+        #roll-btn { width: 100%; padding: 18px; font-size: 20px; font-weight: bold; color: white; background: var(--blue); border: none; border-radius: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #364fc7; }
         #roll-btn:hover { background: #3b5bdb; box-shadow: 0 2px 0 #364fc7; transform: translateY(2px); }
         #roll-btn:disabled { background: #555; box-shadow: none; cursor: not-allowed; transform: none; }
 
-        /* 모달 스타일 */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 999;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal-content {
-            background: var(--modal-bg);
-            padding: 40px;
-            border-radius: 25px;
-            width: 90%;
-            max-width: 450px;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-        }
+        /* --- 3. 모달 및 엔딩 스타일 --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--modal-bg); padding: 40px; border-radius: 25px; width: 90%; max-width: 450px; text-align: center; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
 
         #game-modal .modal-content { border: 2px solid var(--red); box-shadow: 0 0 30px rgba(250, 82, 82, 0.3); }
         #info-modal .modal-content { border: 2px solid var(--blue); box-shadow: 0 0 30px rgba(76, 110, 245, 0.3); }
@@ -199,88 +156,88 @@
 
         .desc-box { border-radius: 15px; padding: 20px; margin-bottom: 25px; text-align: left; }
         .warn-style { background: var(--warning-bg); border: 2px solid var(--red); }
-        .info-style { background: var(--info-bg); border: 2px solid var(--blue); }
+        .info-style { background: rgba(76, 110, 245, 0.15); border: 2px solid var(--blue); }
 
         .box-header { font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .modal-desc-text { color: var(--text-white); font-size: 16px; line-height: 1.5; margin: 0; }
 
-        .fatal-warning {
-            color: var(--yellow);
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 25px;
-            display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
+        .fatal-warning { color: var(--yellow); font-weight: bold; font-size: 18px; margin-bottom: 25px; display: flex; justify-content: center; align-items: center; gap: 10px; }
         
-        .btn-yes { 
-            background: linear-gradient(135deg, var(--red), var(--dark-red));
-            color: white; width: 100%; padding: 20px; border:none; border-radius: 15px; 
-            font-weight:bold; font-size: 20px; margin-bottom: 15px; cursor: pointer; 
-            box-shadow: 0 5px 15px rgba(250, 82, 82, 0.4); transition: 0.2s;
-            display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
+        .btn-yes { background: linear-gradient(135deg, var(--red), var(--dark-red)); color: white; width: 100%; padding: 20px; border:none; border-radius: 15px; font-weight:bold; font-size: 20px; margin-bottom: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(250, 82, 82, 0.4); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 10px; }
         .btn-yes:hover { transform: scale(1.02); box-shadow: 0 8px 20px rgba(250, 82, 82, 0.6); }
         
         .extra-warning { color: var(--yellow); font-size: 14px; margin-bottom: 5px; }
         .game-rule { color: var(--text-gray); font-size: 14px; margin-bottom: 25px; }
 
-        .btn-no, .btn-close { 
-            background: transparent; color: var(--text-gray); border: 2px solid var(--text-gray); 
-            width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 16px; transition: 0.2s; 
-        }
+        .btn-no, .btn-close { background: transparent; color: var(--text-gray); border: 2px solid var(--text-gray); width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 16px; transition: 0.2s; }
         .btn-no:hover, .btn-close:hover { border-color: var(--text-white); color: var(--text-white); background: rgba(255,255,255,0.1); }
-        
         .btn-close { border-color: var(--blue); color: var(--blue); margin-top: 10px; }
         .btn-close:hover { background: rgba(76, 110, 245, 0.2); color: white; }
 
-        /* 엔딩 화면 */
-        #ending {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: black;
-            z-index: 1000;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            overflow-y: auto; /* 내용 많을 시 스크롤 */
-        }
-        .ending-img {
-            width: 300px;
-            max-width: 80%;
-            border-radius: 15px;
-            margin: 20px 0;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-            transition: transform 1s;
-        }
+        #ending { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; overflow-y: auto; }
+        .ending-img { width: 300px; max-width: 80%; border-radius: 15px; margin: 20px 0; box-shadow: 0 0 20px rgba(255,255,255,0.2); transition: transform 1s; }
         .ending-img:hover { transform: scale(1.05); }
+
+        /* 애니메이션 */
+        @keyframes blink { 50% { opacity: 0.5; } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
 </head>
 <body>
 
-    <header>
-        <h1>🌍 두존구 🌍</h1>
-        <div class="round-badge" id="round-txt">ROUND 1 / 5</div>
-    </header>
+    <div id="start-screen">
+        <div class="start-logo">🌍</div>
+        <h1 class="game-title">두존구</h1>
+        <p class="game-subtitle">두 번의 존망을 구하는 게임</p>
 
-    <div id="loading-msg">게임을 불러오는 중입니다...</div>
+        <div class="start-warning-box">
+            <div class="warn-header">⚠️ 경고</div>
+            <p class="warn-text">
+                4명의 플레이어가 세계를 돌며 개발을 합니다.<br>
+                가장 많은 지역을 개발한 플레이어가 승리합니다.<br><br>
+                <span class="warn-highlight">하지만 모든 개발에는 대가가 있습니다...</span>
+            </p>
+        </div>
 
-    <div class="game-container" id="game-ui" style="display:none;">
-        <div id="board-grid"></div>
+        <div class="rules-box">
+            <div class="rules-title">ℹ️ 게임 규칙</div>
+            <ul class="rules-list">
+                <li>4명의 플레이어가 참여합니다</li>
+                <li>각 플레이어는 5번의 턴을 가집니다</li>
+                <li>주사위를 굴려 이동한 나라를 개발할 수 있습니다</li>
+                <li>가장 많이 개발한 플레이어가 승리합니다</li>
+            </ul>
+        </div>
 
-        <div id="sidebar">
-            <div class="panel">
-                <h3>📊 실시간 순위</h3>
-                <div id="rank-list"></div>
-            </div>
+        <button class="btn-start" onclick="startGame()">
+            ▷ 게임 시작
+        </button>
+        
+        <p class="footer-warn">⚠️ 이 게임을 시작하면 후회할 수 있습니다 ⚠️</p>
+    </div>
 
-            <div class="panel control-box">
-                <h3 id="turn-txt" style="color:var(--red)">플레이어 1의 차례</h3>
-                <div id="dice-val">🎲</div>
-                <button id="roll-btn" onclick="rollDice()">주사위 굴리기</button>
+    <div id="game-ui">
+        <header>
+            <h1>🌍 개발 금지 구역 🌍</h1>
+            <div class="round-badge" id="round-txt">ROUND 1 / 5</div>
+        </header>
+
+        <div class="game-container">
+            <div id="board-grid"></div>
+
+            <div id="sidebar">
+                <div class="panel">
+                    <h3>📊 실시간 순위</h3>
+                    <div id="rank-list"></div>
+                </div>
+
+                <div class="panel control-box">
+                    <h3 id="turn-txt" style="color:var(--red)">플레이어 1의 차례</h3>
+                    <div id="dice-val">🎲</div>
+                    <button id="roll-btn" onclick="rollDice()">주사위 굴리기</button>
+                </div>
             </div>
         </div>
     </div>
@@ -298,13 +255,9 @@
 
             <div class="fatal-warning">💀 되돌릴 수 없습니다 💀</div>
 
-            <button class="btn-yes" onclick="decide(true)">
-                ⚡ 이 곳을 개발하시겠습니까?
-            </button>
-            
+            <button class="btn-yes" onclick="decide(true)">⚡ 이 곳을 개발하시겠습니까?</button>
             <div class="extra-warning">⚠️ 금지 ⚠️ 개발 금지 ⚠️ 누르지 마세요 ⚠️</div>
             <p class="game-rule">(승리하려면 개발해야 합니다)</p>
-
             <button class="btn-no" onclick="decide(false)">보존하기 (점수 없음)</button>
         </div>
     </div>
@@ -313,12 +266,10 @@
         <div class="modal-content">
             <div class="modal-flag" id="i-modal-flag">🇧🇷</div>
             <h2 class="modal-title" id="i-modal-title">브라질</h2>
-            
             <div class="desc-box info-style" style="margin-top: 20px;">
                 <div class="box-header" style="color:var(--blue)">ℹ️ 지역 정보</div>
                 <p class="modal-desc-text" id="i-modal-desc">내용</p>
             </div>
-
             <button class="btn-close" onclick="closeInfo()">닫기</button>
         </div>
     </div>
@@ -329,6 +280,7 @@
     </div>
 
     <script>
+        // --- 게임 데이터 및 로직 ---
         const players = [
             { id: 1, name: "플레이어 1", color: "#fa5252", pos: 0, score: 0, lands: [], css: "p1-land" },
             { id: 2, name: "플레이어 2", color: "#4c6ef5", pos: 0, score: 0, lands: [], css: "p2-land" },
@@ -360,18 +312,27 @@
         const maxRound = 5;
         let boardOwner = new Array(20).fill(0);
 
-        window.onload = function() {
-            document.getElementById('loading-msg').style.display = 'none';
+        // [추가됨] 게임 시작 버튼을 누르면 실행되는 함수
+        function startGame() {
+            // 시작 화면 숨기기
+            document.getElementById('start-screen').style.display = 'none';
+            // 게임 화면 보이기
             document.getElementById('game-ui').style.display = 'flex';
+            
+            // 레이아웃이 변경되었으므로 보드와 순위표를 그립니다
+            initGame();
+        }
 
-            // 시작 위치 랜덤
+        // 게임 초기화
+        function initGame() {
+            // 플레이어 위치 랜덤 설정
             players.forEach(p => {
                 p.pos = Math.floor(Math.random() * mapData.length);
             });
 
             drawBoard();
             updateRank();
-        };
+        }
 
         function drawBoard() {
             const grid = document.getElementById('board-grid');
@@ -500,12 +461,10 @@
 
         function showInfo(idx) {
             if(document.getElementById('game-modal').style.display === 'flex') return;
-
             const data = mapData[idx];
             document.getElementById('i-modal-flag').innerText = data.flag;
             document.getElementById('i-modal-title').innerText = data.name;
             document.getElementById('i-modal-desc').innerText = data.desc;
-
             document.getElementById('info-modal').style.display = 'flex';
         }
 
@@ -526,25 +485,20 @@
             document.getElementById('dice-val').innerText = "🎲";
         }
 
-        // --- 엔딩 처리 (이미지 포함) ---
         function gameOver() {
             const ending = document.getElementById('ending');
             const endingContent = document.getElementById('ending-content');
-            
             let allDestroyed = [];
             players.forEach(p => allDestroyed.push(...p.lands));
             
             let html = "";
             
-            // 해피 엔딩 (개발된 땅 0개)
             if(allDestroyed.length === 0) {
                 html += `<h1 style='color:var(--green); font-size:40px; margin-bottom:20px;'>🎉 HAPPY ENDING 🎉</h1>`;
                 html += `<img src="good.jpeg" class="ending-img" alt="아름다운 지구">`;
                 html += `<h2 style='color:white;'>지구는 안전합니다.</h2>`;
                 html += `<p style='color:#ccc; line-height:1.6;'>놀랍게도 아무도 개발을 선택하지 않았습니다.<br>게임은 지루했을지 몰라도, 지구는 지켜졌습니다.<br>이것이 바로 지속 가능한 미래입니다.</p>`;
-            } 
-            // 배드 엔딩 (개발된 땅 1개 이상)
-            else {
+            } else {
                 let maxScore = Math.max(...players.map(p => p.score));
                 let winners = players.filter(p => p.score === maxScore);
                 let winnerText = winners.map(w => `<span style="color:${w.color}">${w.name}</span>`).join(', ');
@@ -557,7 +511,6 @@
                 html += `<p style="color:white;">총 ${allDestroyed.length}개의 지역이 파괴되었습니다.</p>`;
                 html += `<h3 style="color:var(--yellow); margin-top:30px;">"당신은 게임에서 이겼지만,<br>우리는 살 곳을 잃었습니다."</h3>`;
             }
-            
             endingContent.innerHTML = html;
             ending.style.display = 'flex';
         }
