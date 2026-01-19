@@ -539,7 +539,7 @@
             // 해피 엔딩 (개발된 땅 0개)
             if(allDestroyed.length === 0) {
                 html += `<h1 style='color:var(--green); font-size:40px; margin-bottom:20px;'>🎉 HAPPY ENDING 🎉</h1>`;
-                html += `<img src="good.jpg" class="ending-img" alt="아름다운 지구">`;
+                html += `<img src="good.jpeg" class="ending-img" alt="아름다운 지구">`;
                 html += `<h2 style='color:white;'>지구는 안전합니다.</h2>`;
                 html += `<p style='color:#ccc; line-height:1.6;'>놀랍게도 아무도 개발을 선택하지 않았습니다.<br>게임은 지루했을지 몰라도, 지구는 지켜졌습니다.<br>이것이 바로 지속 가능한 미래입니다.</p>`;
             } 
@@ -550,7 +550,7 @@
                 let winnerText = winners.map(w => `<span style="color:${w.color}">${w.name}</span>`).join(', ');
 
                 html += `<h1 style='color:var(--red); font-size:40px; margin-bottom:20px;'>💀 BAD ENDING 💀</h1>`;
-                html += `<img src="bad.jpg" class="ending-img" alt="파괴된 지구">`;
+                html += `<img src="bad.png" class="ending-img" alt="파괴된 지구">`;
                 html += `<p style="font-size:18px; color:white;">우승자: ${winnerText} (총 ${maxScore}곳 개발)</p>`;
                 html += `<hr style="border-color:#333; width:80%; margin:20px auto;">`;
                 html += `<p style="color:var(--red); font-weight:bold; font-size:16px;">[ ${allDestroyed.join(', ')} ]</p>`;
